@@ -128,12 +128,8 @@ int main(void)
   /* add threads, ... */
 
   /* definition and creation of Task1 */
-  osThreadDef(Task1, vTask1, osPriorityAboveNormal, 0, 100);
+  osThreadDef(Task1, vTask1, osPriorityAboveNormal, 1, 100);
   Task1_handle = osThreadCreate(osThread(Task1), NULL);
-
-  /* definition and creation of Task2 */
-  osThreadDef(Task2, vTask2, osPriorityNormal, 0, 100);
-  Task2_handle = osThreadCreate(osThread(Task2), NULL);
 
   /* USER CODE END RTOS_THREADS */
 
@@ -243,19 +239,19 @@ void StartDefaultTask(void const * argument)
 void vTask1(void const * argument)
 {
   /* USER CODE BEGIN 6 */
+  /* definition and creation of Task2 */
+  osThreadDef(Task2, vTask2, osPriorityHigh, 1, 100);
   const char *pcTask_name[] = {"\r\nTask 1 is running."};
-  const char *pcTask_msg[] = {"\r\nIncreasing Task 2 priority."};
   /* Infinite loop */
   for(;;)
   {
     printf(*pcTask_name);
-    HAL_Delay(1);
-    printf(*pcTask_msg);
     HAL_Delay(200);
-    osThreadSetPriority(Task2_handle, osThreadGetPriority(osThreadGetId()) + 1);
-    HAL_Delay(10);
+   
+    Task2_handle = osThreadCreate(osThread(Task2), NULL);
+
+    osDelay(100);
   }
-  osThreadTerminate(Task1_handle); /* Not supposed to reach here */
   /* USER CODE END 6 */
 }
 
@@ -270,7 +266,7 @@ void vTask2(void const * argument)
 {
   /* USER CODE BEGIN 7 */
   const char *pcTask_name[] = {"\r\nTask 2 is running."};
-  const char *pcTask_msg[] = {"\r\nLowering Task 2 priority."};
+  const char *pcTask_msg[] = {"\r\nDeleting Task 2."};
   /* Infinite loop */
   for(;;)
   {
@@ -278,10 +274,8 @@ void vTask2(void const * argument)
     HAL_Delay(1);
     printf(*pcTask_msg);
     HAL_Delay(200);
-    osThreadSetPriority(Task2_handle, osThreadGetPriority(osThreadGetId()) - 2);
-    HAL_Delay(10);
+    osThreadTerminate(Task2_handle);
   }
-  osThreadTerminate(Task2_handle); /* Not supposed to reach here */
   /* USER CODE END 7 */
 }
 
